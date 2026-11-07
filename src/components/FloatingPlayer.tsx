@@ -59,7 +59,12 @@ export const FloatingPlayer: React.FC = () => {
       {isMini ? (
         <div className="pointer-events-auto flex items-center gap-3 px-4 py-2.5 rounded-full bg-white/95 border border-[#d8c6b2] backdrop-blur-xl shadow-xl shadow-[#4e342e]/15 hover:border-[#b86b2b] transition-all">
           <button
-            onClick={togglePlay}
+            onClick={() => {
+              if (isMini && !isPlaying) {
+                toggleMini();
+              }
+              togglePlay();
+            }}
             className="w-8 h-8 rounded-full bg-[#b86b2b] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-md"
             aria-label={isPlaying ? "रोकें" : "सुनें"}
           >

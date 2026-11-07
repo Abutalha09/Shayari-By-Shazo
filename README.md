@@ -2,7 +2,7 @@
 
 > **"तहरीर एक खामोश आवाज़ और क़लम हाथ की जबान है।"**  
 > *A modern, atmospheric handwritten shayari web experience built with Vite, React, TypeScript, Tailwind CSS, and GSAP.*  
-> **शायर / Poet:** شازیہ ("Shazo") • **Portfolio:** [abutalha09.vercel.app](https://abutalha09.vercel.app) • **Route:** NH 48 · लखनऊ–दिल्ली
+> **शायर / Poet:** شازیہ ("Shazo") • **Portfolio:** [abutalha09.vercel.app](https://abutalha09.vercel.app) • **Route:** NH 48 · कानपुर–मुंबई
 
 ---
 

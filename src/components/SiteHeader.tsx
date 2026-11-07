@@ -103,11 +103,11 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-serif font-bold text-lg sm:text-xl text-[#2d1810] tracking-tight group-hover:text-[#b86b2b] transition-colors">
-                  शायरी <span className="text-xs uppercase tracking-widest text-[#b86b2b] font-sans font-semibold">BY Shazo</span>
+                  शायरी BY <span className="text-sm sm:text-base text-[#b86b2b] font-serif font-bold">شازیہ (Shazo)</span>
                 </span>
               </div>
               <p className="text-[10px] text-[#7d6456] tracking-wider hidden sm:block">
-                क़लम, काग़ज़ और आवाज़ · NH 48
+                क़लम, काग़ज़ और आवाज़ · कानपुर–मुंबई
               </p>
             </div>
           </a>

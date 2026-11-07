@@ -74,12 +74,12 @@ class AmbientHarmonicDrone {
     try {
       const now = this.ctx.currentTime;
       const master = this.ctx.createGain();
-      master.gain.setValueAtTime(0.001, now);
-      master.gain.exponentialRampToValueAtTime(0.045, now + 1.2); // Soft, gentle acoustic warmth
+      master.gain.setValueAtTime(0.0005, now);
+      master.gain.exponentialRampToValueAtTime(0.012, now + 1.2); // Ultra soft, calming tanpura undertone
 
       const filter = this.ctx.createBiquadFilter();
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(380, now);
+      filter.frequency.setValueAtTime(260, now);
 
       master.connect(filter);
       filter.connect(this.ctx.destination);
@@ -136,7 +136,7 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(12);
   const [isSpeechMode, setIsSpeechMode] = useState(false);
-  const [isMini, setIsMini] = useState(false);
+  const [isMini, setIsMini] = useState(true); // Default to compact pill mode as requested
   const [autoPlayNext, setAutoPlayNext] = useState(true);
 
   // Favorites & Last read page from localStorage
@@ -162,6 +162,7 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const speechTimerRef = useRef<any>(null);
+  const autoNextTimeoutRef = useRef<any>(null);
   const speechStartTimeRef = useRef<number>(0);
   const speechEstimatedDurRef = useRef<number>(10);
   const isPlayingRef = useRef(false);
@@ -189,7 +190,14 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current.onerror = null;
+        audioRef.current.ontimeupdate = null;
         audioRef.current = null;
+      }
+      if (autoNextTimeoutRef.current) {
+        clearTimeout(autoNextTimeoutRef.current);
+        autoNextTimeoutRef.current = null;
       }
       if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.cancel();
@@ -202,8 +210,15 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const stopAllPlayback = useCallback(() => {
+    if (autoNextTimeoutRef.current) {
+      clearTimeout(autoNextTimeoutRef.current);
+      autoNextTimeoutRef.current = null;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current.ontimeupdate = null;
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
@@ -221,119 +236,142 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
     setCurrentTime(0);
   }, []);
 
-  const playSpeech = useCallback((shayari: Shayari) => {
-    if (typeof window === "undefined") {
-      setIsPlaying(false);
-      isPlayingRef.current = false;
-      return;
-    }
-
-    const textToSpeak = shayari.text.trim() || shayari.title;
-    const words = textToSpeak.split(/\s+/).length;
-    const estimatedSeconds = Math.max(8, Math.round((words / 100) * 60));
-    speechEstimatedDurRef.current = estimatedSeconds;
-    setDuration(estimatedSeconds);
-    setCurrentTime(0);
-    setIsSpeechMode(true);
-    setIsPlaying(true);
-    isPlayingRef.current = true;
-    setIsPaused(false);
-
-    // Start soothing ambient background harmony
-    ambientDrone?.start();
-
-    // Start progress timer immediately
-    speechStartTimeRef.current = Date.now();
-    if (speechTimerRef.current) clearInterval(speechTimerRef.current);
-    speechTimerRef.current = setInterval(() => {
-      const elapsed = (Date.now() - speechStartTimeRef.current) / 1000;
-      if (elapsed >= estimatedSeconds) {
-        clearInterval(speechTimerRef.current);
-        setCurrentTime(estimatedSeconds);
+  const playSpeech = useCallback(
+    (shayari: Shayari) => {
+      if (typeof window === "undefined") {
         setIsPlaying(false);
         isPlayingRef.current = false;
-        ambientDrone?.stop();
-        if (autoPlayNext) {
-          setTimeout(() => {
-            const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
-            const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
-            playShayari(SHAYARIS_DATA[nextIndex]);
-          }, 800);
-        }
-      } else {
-        setCurrentTime(elapsed);
+        return;
       }
-    }, 250);
 
-    // If browser supports SpeechSynthesis, speak the text
-    if (window.speechSynthesis) {
-      try {
-        window.speechSynthesis.cancel();
+      // Format text for clear, natural speech reading
+      const textToSpeak = shayari.text.trim() || shayari.title;
+      const words = textToSpeak.split(/\s+/).length;
+      const estimatedSeconds = Math.max(8, Math.round((words / 100) * 60));
+      speechEstimatedDurRef.current = estimatedSeconds;
+      setDuration(estimatedSeconds);
+      setCurrentTime(0);
+      setIsSpeechMode(true);
+      setIsPlaying(true);
+      isPlayingRef.current = true;
+      setIsPaused(false);
 
-        // 60ms delay ensures Chromium does not drop the utterance after cancel()
-        setTimeout(() => {
-          try {
-            window.speechSynthesis.resume();
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-
-            // Keep reference to utterance to prevent Chrome garbage collection
-            (window as any).__shazoUtterance = utterance;
-
-            const voices = window.speechSynthesis.getVoices();
-            const hiVoice = voices.find(
-              (v) =>
-                v.lang.toLowerCase().startsWith("hi") ||
-                v.lang.toLowerCase().startsWith("ur") ||
-                v.name.toLowerCase().includes("hindi") ||
-                v.name.toLowerCase().includes("india")
-            );
-
-            if (hiVoice) {
-              utterance.voice = hiVoice;
-              utterance.lang = hiVoice.lang;
-            } else {
-              utterance.lang = "hi-IN";
-            }
-
-            utterance.rate = 0.88;
-            utterance.pitch = 0.98;
-
-            utterance.onend = () => {
-              if (speechTimerRef.current) clearInterval(speechTimerRef.current);
-              setCurrentTime(estimatedSeconds);
-              setIsPlaying(false);
-              isPlayingRef.current = false;
-              ambientDrone?.stop();
-              if (autoPlayNext) {
-                setTimeout(() => {
-                  const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
-                  const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
-                  playShayari(SHAYARIS_DATA[nextIndex]);
-                }, 800);
-              }
-            };
-
-            utterance.onerror = (e) => {
-              // Non-fatal: if TTS voice packs are missing, ambient music & timer continue gracefully
-              console.warn("SpeechSynthesis notice:", e);
-            };
-
-            window.speechSynthesis.speak(utterance);
-          } catch (err) {
-            console.warn("SpeechSynthesis trigger error", err);
+      // Start progress timer
+      speechStartTimeRef.current = Date.now();
+      if (speechTimerRef.current) clearInterval(speechTimerRef.current);
+      speechTimerRef.current = setInterval(() => {
+        const elapsed = (Date.now() - speechStartTimeRef.current) / 1000;
+        if (elapsed >= estimatedSeconds) {
+          clearInterval(speechTimerRef.current);
+          setCurrentTime(estimatedSeconds);
+          setIsPlaying(false);
+          isPlayingRef.current = false;
+          ambientDrone?.stop();
+          if (autoPlayNext) {
+            if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
+            autoNextTimeoutRef.current = setTimeout(() => {
+              const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
+              const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
+              playShayari(SHAYARIS_DATA[nextIndex]);
+            }, 800);
           }
-        }, 60);
-      } catch (err) {
-        console.warn("SpeechSynthesis init error", err);
+        } else {
+          setCurrentTime(elapsed);
+        }
+      }, 250);
+
+      // Web Speech Synthesis
+      if (window.speechSynthesis) {
+        try {
+          window.speechSynthesis.cancel();
+
+          // Safe delay ensures cancel queue is flushed before speak
+          setTimeout(() => {
+            try {
+              window.speechSynthesis.resume();
+              const utterance = new SpeechSynthesisUtterance(textToSpeak);
+              (window as any).__shazoUtterance = utterance;
+
+              const voices = window.speechSynthesis.getVoices();
+              const hiVoice =
+                voices.find(
+                  (v) =>
+                    v.lang.toLowerCase().startsWith("hi") ||
+                    v.name.toLowerCase().includes("hindi") ||
+                    v.name.toLowerCase().includes("madhur") ||
+                    v.name.toLowerCase().includes("swara") ||
+                    v.name.toLowerCase().includes("kalpana")
+                ) ||
+                voices.find(
+                  (v) =>
+                    v.lang.toLowerCase().startsWith("ur") ||
+                    v.name.toLowerCase().includes("urdu")
+                ) ||
+                voices.find(
+                  (v) =>
+                    v.lang.toLowerCase().startsWith("en-in") ||
+                    v.name.toLowerCase().includes("india")
+                );
+
+              if (hiVoice) {
+                utterance.voice = hiVoice;
+                utterance.lang = hiVoice.lang;
+              } else {
+                utterance.lang = "hi-IN";
+              }
+
+              utterance.rate = 0.88;
+              utterance.pitch = 0.98;
+
+              // Only start ambient tanpura warmth when speech ACTUALLY begins
+              utterance.onstart = () => {
+                ambientDrone?.start();
+              };
+
+              utterance.onend = () => {
+                if (speechTimerRef.current) clearInterval(speechTimerRef.current);
+                setCurrentTime(estimatedSeconds);
+                setIsPlaying(false);
+                isPlayingRef.current = false;
+                ambientDrone?.stop();
+                if (autoPlayNext) {
+                  if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
+                  autoNextTimeoutRef.current = setTimeout(() => {
+                    const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
+                    const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
+                    playShayari(SHAYARIS_DATA[nextIndex]);
+                  }, 800);
+                }
+              };
+
+              utterance.onerror = (e) => {
+                console.warn("SpeechSynthesis notice:", e);
+                // On error, immediately stop ambient drone so no background noise is left
+                ambientDrone?.stop();
+              };
+
+              window.speechSynthesis.speak(utterance);
+            } catch (err) {
+              console.warn("SpeechSynthesis trigger error", err);
+              ambientDrone?.stop();
+            }
+          }, 80);
+        } catch (err) {
+          console.warn("SpeechSynthesis init error", err);
+          ambientDrone?.stop();
+        }
       }
-    }
-  }, [autoPlayNext]);
+    },
+    [autoPlayNext]
+  );
 
   const playShayari = useCallback(
     (shayari: Shayari) => {
       stopAllPlayback();
       setActiveShayari(shayari);
       setLastReadPage(shayari.page);
+      // Auto-expand player when user starts listening
+      setIsMini(false);
 
       // If audio file exists, try playing it
       if (shayari.audio) {
@@ -341,30 +379,33 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
         audioRef.current = audio;
         setIsSpeechMode(false);
 
-        audio.addEventListener("loadedmetadata", () => {
+        audio.onloadedmetadata = () => {
           setDuration(audio.duration || 12);
-        });
+        };
 
-        audio.addEventListener("timeupdate", () => {
+        audio.ontimeupdate = () => {
           setCurrentTime(audio.currentTime);
-        });
+        };
 
-        audio.addEventListener("ended", () => {
+        audio.onended = () => {
           setIsPlaying(false);
           isPlayingRef.current = false;
           setIsPaused(false);
           ambientDrone?.stop();
           if (autoPlayNext) {
-            const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
-            const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
-            playShayari(SHAYARIS_DATA[nextIndex]);
+            if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
+            autoNextTimeoutRef.current = setTimeout(() => {
+              const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
+              const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
+              playShayari(SHAYARIS_DATA[nextIndex]);
+            }, 800);
           }
-        });
+        };
 
-        audio.addEventListener("error", () => {
+        audio.onerror = () => {
           console.warn(`Audio error for ${shayari.audio}, falling back to AI voice`);
           playSpeech(shayari);
-        });
+        };
 
         audio
           .play()

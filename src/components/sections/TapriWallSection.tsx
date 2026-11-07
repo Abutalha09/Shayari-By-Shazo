@@ -173,7 +173,7 @@ export const TapriWallSection: React.FC<TapriWallSectionProps> = ({
               شازیہ (Shazo)
             </h3>
             <p className="text-xs sm:text-sm text-[#6e5548] max-w-xl leading-relaxed">
-              लखनऊ–दिल्ली के हाईवे से शुरू हुआ ये सफ़र डायरी के 59 पन्नों तक पहुँचा है।
+              कानपुर–मुंबई के हाईवे से शुरू हुआ ये सफ़र डायरी के 59 पन्नों तक पहुँचा है।
               हस्तलिखित नज़्में, चाय की चुस्कियां और आवाज़ का जादू।
             </p>
           </div>

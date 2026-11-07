@@ -5,7 +5,7 @@
  * Author: شازیہ (Shazo)
  */
 
-window.ShareCardGenerator = (function() {
+window.ShareCardGenerator = (function () {
   const canvas = document.getElementById('share-canvas');
   let ctx = null;
   let currentShayari = null;
@@ -135,7 +135,7 @@ window.ShareCardGenerator = (function() {
     // 5. Center: Handwritten Image
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = function() {
+    img.onload = function () {
       const boxX = 110;
       const boxY = 330;
       const boxW = 860;
@@ -198,7 +198,7 @@ window.ShareCardGenerator = (function() {
       }, 'image/png');
     };
 
-    img.onerror = function() {
+    img.onerror = function () {
       // Fallback if image fails
       ctx.fillStyle = '#fff';
       ctx.font = '28px sans-serif';

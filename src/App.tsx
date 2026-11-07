@@ -6,6 +6,7 @@ import { FloatingPlayer } from "@/components/FloatingPlayer";
 import { AboutModal } from "@/components/AboutModal";
 import { ShareStoryModal } from "@/components/ShareStoryModal";
 import { RandomShayariModal } from "@/components/RandomShayariModal";
+import { ShayariDetailModal } from "@/components/ShayariDetailModal";
 import { DiarySection } from "@/components/sections/DiarySection";
 import { MoodsOrbitSection } from "@/components/sections/MoodsOrbitSection";
 import { SkySection } from "@/components/sections/SkySection";
@@ -114,7 +115,7 @@ const MainContent: React.FC = () => {
         <p className="font-serif text-[#2d1810] text-base font-bold">
           शायरी BY <span className="text-[#b86b2b]">شازیہ (Shazo)</span>
         </p>
-        <p className="text-xs text-[#7d6456]">NH 48 · लखनऊ–दिल्ली · ऑल राइट्स रिज़र्व्ड</p>
+        <p className="text-xs text-[#7d6456]">NH 48 · कानपुर–मुंबई · ऑल राइट्स रिज़र्व्ड</p>
         <p className="text-[11px] text-[#7d6456]/80 pt-1">
           पोर्टफोलियो:{" "}
           <a
@@ -157,6 +158,15 @@ const MainContent: React.FC = () => {
           isOpen={true}
           shayari={shareStoryShayari}
           onClose={() => setShareStoryShayari(null)}
+        />
+      )}
+
+      {detailShayari && (
+        <ShayariDetailModal
+          isOpen={true}
+          shayari={detailShayari}
+          onClose={() => setDetailShayari(null)}
+          onOpenShareStory={(s) => setShareStoryShayari(s)}
         />
       )}
     </div>

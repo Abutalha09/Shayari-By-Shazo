@@ -60,7 +60,7 @@ export const ShareStoryModal: React.FC<ShareStoryModalProps> = ({
 
     ctx.fillStyle = "#6e5548";
     ctx.font = "24px sans-serif";
-    ctx.fillText("क़लम, काग़ज़ और आवाज़ · NH 48 · लखनऊ–दिल्ली", 540, 205);
+    ctx.fillText("क़लम, काग़ज़ और आवाज़ · NH 48 · कानपुर–मुंबई", 540, 205);
 
     // Mood Badge
     ctx.fillStyle = "rgba(184, 107, 43, 0.12)";

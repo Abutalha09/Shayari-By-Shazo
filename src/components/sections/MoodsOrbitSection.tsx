@@ -26,7 +26,7 @@ export const MoodsOrbitSection: React.FC<MoodsOrbitSectionProps> = ({
         alt: "इश्क़ की कशिश",
         rating: 4.9,
         chef: "شازیہ",
-        kitchen: "NH 48 · लखनऊ–दिल्ली",
+        kitchen: "NH 48 · कानपुर–मुंबई",
         description:
           "इश्क़ वो नहीं जो सिर्फ लफ़्ज़ों में बयां हो, इश्क़ वो है जो खामोशी में भी दिल की धड़कन बनकर सुनाई दे।",
         likes: 240,
@@ -96,7 +96,7 @@ export const MoodsOrbitSection: React.FC<MoodsOrbitSectionProps> = ({
         chef: "شازیہ",
         kitchen: "सड़क व क़लम",
         description:
-          "लखनऊ से दिल्ली की ये लंबी सड़कें सिर्फ फासले नहीं तय करतीं, तन्हाई में नए शेर भी तराशती हैं।",
+          "कानपुर से मुंबई की ये लंबी सड़कें सिर्फ फासले नहीं तय करतीं, तन्हाई में नए शेर भी तराशती हैं।",
         likes: 380,
         ingredients: ["मंज़िल", "पहिए", "रोशनी", "तारें", "रास्ते"],
         accent: "#ea580c",

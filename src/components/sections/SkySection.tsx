@@ -16,29 +16,29 @@ export const SkySection: React.FC<SkySectionProps> = ({
 }) => {
   const [selectedMood, setSelectedMood] = useState<string>("All");
   const [hoveredShayari, setHoveredShayari] = useState<Shayari | null>(null);
-  const { playShayari, isFavorite, toggleFavorite } = useAudioPlayer();
+  const { playShayari, isPlaying, activeShayari } = useAudioPlayer();
 
-  // Generate pseudo-random coordinates for all 59 shayaris based on their id
+  // Generate deterministic coordinates for all 59 shayaris based on their id
   const starNodes = useMemo(() => {
     return SHAYARIS_DATA.map((s, idx) => {
       const seed = (s.id * 9301 + 49297) % 233280;
       const seed2 = (s.id * 49297 + 9301) % 233280;
-      const x = 5 + (seed / 233280) * 90;
+      const x = 6 + (seed / 233280) * 88;
       const y = 8 + (seed2 / 233280) * 84;
 
       // Color mapping by mood
-      let color = "#e5a759";
-      if (s.mood === "Ishq") color = "#f43f5e";
-      else if (s.mood === "Judaai" || s.mood === "Dard") color = "#60a5fa";
-      else if (s.mood === "Chai-wali-raatein") color = "#fbbf24";
-      else if (s.mood === "Umeed") color = "#34d399";
+      let color = "#f6a94b"; // Golden Chai
+      if (s.mood === "Ishq") color = "#f43f5e"; // Rose Red
+      else if (s.mood === "Judaai" || s.mood === "Dard") color = "#60a5fa"; // Melancholy Blue
+      else if (s.mood === "Chai-wali-raatein") color = "#fbbf24"; // Warm Amber
+      else if (s.mood === "Umeed") color = "#34d399"; // Hope Green
 
       return {
         ...s,
         x,
         y,
         color,
-        size: idx % 3 === 0 ? 12 : idx % 2 === 0 ? 9 : 7,
+        size: idx % 3 === 0 ? 13 : idx % 2 === 0 ? 10 : 8,
       };
     });
   }, []);
@@ -49,6 +49,12 @@ export const SkySection: React.FC<SkySectionProps> = ({
   }, [starNodes, selectedMood]);
 
   const moodsList = ["All", "Ishq", "Judaai", "Dard", "Umeed", "Chai-wali-raatein"];
+
+  const handleStarClick = (star: Shayari) => {
+    setHoveredShayari(star);
+    onSelectShayari(star);
+    playShayari(star);
+  };
 
   return (
     <section id="view-sky" className="relative w-full py-16 scroll-mt-24 overflow-hidden">
@@ -64,7 +70,7 @@ export const SkySection: React.FC<SkySectionProps> = ({
               शायरी के चमकते सितारे
             </h2>
             <p className="text-xs sm:text-sm text-[#6e5548] mt-1">
-              हर तारा एक शेर है। किसी भी सितारे पर क्लिक करके उसे सुनें और पढ़ें।
+              हर सितारा एक शेर है। किसी भी सितारे पर क्लिक करें—वह तुरंत बोलेगा और उसका पन्ना खुलेगा।
             </p>
           </div>
 
@@ -87,14 +93,14 @@ export const SkySection: React.FC<SkySectionProps> = ({
         </div>
 
         {/* Sky Viewport Box */}
-        <div className="relative w-full h-[520px] sm:h-[620px] rounded-3xl bg-gradient-to-b from-[#16121a] via-[#1f1614] to-[#2b1810] border border-[#dec8b2] overflow-hidden shadow-2xl">
+        <div className="relative w-full h-[540px] sm:h-[640px] rounded-3xl bg-gradient-to-b from-[#140e1b] via-[#1a1216] to-[#251510] border border-[#dec8b2] overflow-hidden shadow-2xl">
           {/* Subtle star dust background */}
           <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 
-          {/* Big Ambient Moon */}
-          <div className="absolute top-8 right-12 w-24 h-24 rounded-full bg-gradient-to-br from-[#faf6f0]/20 to-transparent blur-md pointer-events-none" />
-          <div className="absolute top-10 right-14 w-20 h-20 rounded-full border border-white/20 flex items-center justify-center pointer-events-none opacity-60">
-            <div className="w-16 h-16 rounded-full bg-white/10" />
+          {/* Ambient Moon & Night Glow */}
+          <div className="absolute top-8 right-12 w-28 h-28 rounded-full bg-gradient-to-br from-[#faf6f0]/25 to-transparent blur-md pointer-events-none" />
+          <div className="absolute top-10 right-14 w-24 h-24 rounded-full border border-white/20 flex items-center justify-center pointer-events-none opacity-60">
+            <div className="w-18 h-18 rounded-full bg-white/10" />
           </div>
 
           {/* SVG Constellation lines connecting stars */}
@@ -120,6 +126,8 @@ export const SkySection: React.FC<SkySectionProps> = ({
           {/* Stars */}
           {filteredStars.map((star) => {
             const isHovered = hoveredShayari?.id === star.id;
+            const isPlayingThis = activeShayari?.id === star.id && isPlaying;
+
             return (
               <div
                 key={star.id}
@@ -127,15 +135,17 @@ export const SkySection: React.FC<SkySectionProps> = ({
                   left: `${star.x}%`,
                   top: `${star.y}%`,
                 }}
-                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 touch-manipulation p-4 -m-4 flex items-center justify-center group"
                 onMouseEnter={() => setHoveredShayari(star)}
                 onMouseLeave={() => setHoveredShayari(null)}
-                onClick={() => onSelectShayari(star)}
+                onClick={() => handleStarClick(star)}
+                title={`सफ़ा ${star.page}: ${star.title}`}
+                aria-label={`सफ़ा ${star.page}: ${star.title}`}
               >
                 {/* Glow ring */}
                 <div
-                  className={`absolute inset-0 m-auto rounded-full blur-sm transition-transform duration-300 ${
-                    isHovered ? "scale-250 opacity-100" : "scale-100 opacity-60"
+                  className={`absolute rounded-full blur-sm transition-transform duration-300 ${
+                    isHovered || isPlayingThis ? "scale-250 opacity-100" : "scale-100 opacity-60"
                   }`}
                   style={{
                     backgroundColor: star.color,
@@ -144,23 +154,23 @@ export const SkySection: React.FC<SkySectionProps> = ({
                   }}
                 />
 
-                {/* Star center */}
+                {/* Star center dot */}
                 <div
                   className={`relative rounded-full transition-all duration-300 ${
-                    isHovered ? "scale-150 ring-2 ring-white" : "hover:scale-125"
+                    isHovered || isPlayingThis ? "scale-150 ring-2 ring-white" : "group-hover:scale-125"
                   }`}
                   style={{
                     width: `${star.size}px`,
                     height: `${star.size}px`,
-                    backgroundColor: isHovered ? "#ffffff" : star.color,
-                    boxShadow: `0 0 10px ${star.color}`,
+                    backgroundColor: isHovered || isPlayingThis ? "#ffffff" : star.color,
+                    boxShadow: `0 0 12px ${star.color}`,
                   }}
                 />
 
-                {/* Pulsing beacon if active */}
-                {isHovered && (
+                {/* Pulsing Beacon if playing or hovered */}
+                {(isHovered || isPlayingThis) && (
                   <span
-                    className="absolute -inset-2 rounded-full animate-ping opacity-75"
+                    className="absolute w-8 h-8 rounded-full animate-ping opacity-75"
                     style={{ backgroundColor: star.color }}
                   />
                 )}
@@ -168,9 +178,9 @@ export const SkySection: React.FC<SkySectionProps> = ({
             );
           })}
 
-          {/* Floating Hover Card (Preview on hover) */}
+          {/* Floating Hover Card (Preview on hover/tap) */}
           {hoveredShayari && (
-            <div className="absolute bottom-6 left-6 right-6 sm:right-auto sm:max-w-md p-4 rounded-2xl bg-white/95 border border-[#dec8b2] backdrop-blur-xl shadow-2xl pointer-events-auto transition-all animate-fadeIn text-[#2d1810]">
+            <div className="absolute bottom-6 left-6 right-6 sm:right-auto sm:max-w-md p-4 rounded-2xl bg-white/95 border border-[#dec8b2] backdrop-blur-xl shadow-2xl z-30 transition-all animate-fadeIn text-[#2d1810]">
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#f5ece0] text-[#9c5720] border border-[#dec8b2]">
                   {hoveredShayari.mood}
@@ -189,22 +199,22 @@ export const SkySection: React.FC<SkySectionProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    playShayari(hoveredShayari);
+                    handleStarClick(hoveredShayari);
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#b86b2b] text-white text-xs font-semibold hover:bg-[#9c5720] active:scale-95 transition-all shadow-sm"
                 >
                   <Play className="w-3 h-3 fill-current" />
-                  <span>सुनें</span>
+                  <span>सुनें व पढ़ें</span>
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onSelectShayari(hoveredShayari);
+                    onOpenShareStory(hoveredShayari);
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#dec8b2] text-[#2d1810] text-xs font-medium hover:bg-[#f5ece0] transition-colors shadow-sm"
                 >
-                  <Info className="w-3 h-3 text-[#b86b2b]" />
-                  <span>पूरा पढ़ें</span>
+                  <Share2 className="w-3 h-3 text-[#b86b2b]" />
+                  <span>Story कार्ड</span>
                 </button>
               </div>
             </div>

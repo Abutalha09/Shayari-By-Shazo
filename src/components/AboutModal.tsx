@@ -43,7 +43,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             </h3>
             <p className="text-xs text-[#6e5548] flex items-center gap-1.5 mt-0.5">
               <MapPin className="w-3.5 h-3.5 text-[#b86b2b]" />
-              NH 48 · लखनऊ–दिल्ली (तहरीरें और ख़याल)
+              NH 48 · कानपुर–मुंबई (तहरीरें और ख़याल)
             </p>
           </div>
         </div>
