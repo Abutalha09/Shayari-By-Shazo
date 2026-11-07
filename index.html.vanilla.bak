@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="hi" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>शायरी by Shazo | क़लम, काग़ज़ और आवाज़ - ?????</title>
+
+  <!-- SEO & Social Meta Tags -->
+  <meta name="description"
+    content="हाथ से लिखी शायरियों की डिजिटल डायरी और आवाज़ का जादू। मोहम्मद अबू तल्हा (Shazo) के लिखे शेर, नज़्म और ख़याल।">
+  <meta name="keywords"
+    content="Shayari, Urdu Poetry, Hindi Shayari, ?????, Shazo, Digital Diary, Ishq, Judaai, Dard, Umeed, Chai Tapri">
+  <meta name="author" content="????? (Shazo)">
+
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://abutalha09.vercel.app">
+  <meta property="og:title" content="शायरी by Shazo | क़लम, काग़ज़ और आवाज़">
+  <meta property="og:description"
+    content="हाथ से लिखी शायरी की एक जादुई डायरी। पन्ने पलटें, मूड रूम्स में ठहरें, और मोहम्मद अबू तल्हा की आवाज़ में सुनें।">
+  <meta property="og:image" content="images/01.webp">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="शायरी by Shazo | ?????">
+  <meta name="twitter:description" content="हाथ से लिखी शायरियों की डिजिटल डायरी और आवाज़ का जादू।">
+  <meta name="twitter:image" content="images/01.webp">
+
+  <!-- Theme Color for Mobile Browsers -->
+  <meta name="theme-color" content="#0e0703">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Google Fonts: Anek Devanagari + Tiro Devanagari Hindi + Plus Jakarta Sans + Cinzel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anek+Devanagari:wght@400;500;600;700;800&family=Cinzel:wght@600;700;900&family=Noto+Nastaliq+Urdu:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Tiro+Devanagari+Hindi:ital@0;1&family=Caveat:wght@600&display=swap"
+    rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="theme-busdriver">
+
+  <!-- SVG Film Grain Filter (Authentic 90s Vintage Texture like busdriver.wtf) -->
+  <svg class="film-grain-layer" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden="true">
+    <filter id="film-grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="3" seed="19" stitchTiles="stitch" result="noise" />
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono" />
+      <feComponentTransfer in="mono">
+        <feFuncR type="discrete" tableValues="0.15 0.35 0.55 0.75 0.95" />
+        <feFuncG type="discrete" tableValues="0.15 0.35 0.55 0.75 0.95" />
+        <feFuncB type="discrete" tableValues="0.15 0.35 0.55 0.75 0.95" />
+      </feComponentTransfer>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#film-grain)" />
+  </svg>
+
+  <!-- Ambient Audio Context Layer -->
+  <div id="ambient-container" class="ambient-layer"></div>
+
+  <!-- Minimal Frosted Top Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <!-- Left: Logo & Route Indicator -->
+      <div class="brand">
+        <a href="#diary" class="brand-link" id="brand-link">
+          <div class="brand-emblem" title="शायरी by Shazo">ش</div>
+          <div class="brand-text">
+            <h1 class="brand-title">शायरी <span class="brand-by">by</span> <span class="brand-name">Shazo</span></h1>
+            <span class="brand-route">NH 48 · लखनऊ – दिल्ली · 59 शेर</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center: Clean View Switcher Navigation Capsule with Consistent Line Icons -->
+      <nav class="view-nav" aria-label="मुख्य व्यू चयन">
+        <div class="nav-track" role="tablist">
+          <button class="nav-tab active" data-view="diary" id="tab-diary" role="tab" aria-selected="true" aria-controls="view-diary">
+            <svg class="nav-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span class="nav-tab-label">डायरी</span>
+          </button>
+          <button class="nav-tab" data-view="moods" id="tab-moods" role="tab" aria-selected="false" aria-controls="view-moods">
+            <svg class="nav-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            <span class="nav-tab-label">5 मूड्स</span>
+          </button>
+          <button class="nav-tab" data-view="sky" id="tab-sky" role="tab" aria-selected="false" aria-controls="view-sky">
+            <svg class="nav-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span class="nav-tab-label">आसमाँ</span>
+          </button>
+          <button class="nav-tab" data-view="wall" id="tab-wall" role="tab" aria-selected="false" aria-controls="view-wall">
+            <svg class="nav-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 17v5M5 17h14v-2l-2-2V5h1V3H6v2h1v8l-2 2v2z"/></svg>
+            <span class="nav-tab-label">चाय टपरी</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Right: Live Meaningful Time Greeting & Quick Actions -->
+      <div class="header-actions">
+        <!-- Meaningful Time Greeting Badge (e.g. रात के शेर · 11:15 PM) -->
+        <div class="live-clock" id="live-clock" title="वक़्त व अहसास" aria-live="polite">
+          <span class="clock-blink-dot"></span>
+          <span class="clock-greeting" id="clock-greeting">रात के शेर</span>
+          <span class="clock-sep">·</span>
+          <span class="clock-time" id="clock-time">11:15 PM</span>
+        </div>
+
+        <button class="action-btn" id="btn-random-header" title="रैंडम शायरी (Surprise Me)" aria-label="Random Shayari">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect width="18" height="18" x="3" y="3" rx="3"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/><circle cx="16" cy="16" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="16" cy="8" r="1.2" fill="currentColor"/><circle cx="8" cy="16" r="1.2" fill="currentColor"/></svg>
+          <span class="btn-label">रैंडम</span>
+        </button>
+
+        <button class="action-btn accent-chai" id="btn-about-header" title="शायर मोहम्मद अबू तल्हा के बारे में" aria-label="About Poet">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+          <span class="btn-label">शायर</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== BUSDRIVER-STYLE HERO SECTION ==================== -->
+  <section class="bus-hero" id="bus-hero">
+    <div class="bus-hero-inner">
+      <div class="hero-kicker">
+        <span class="hero-kicker-dot"></span>
+        <span class="hero-kicker-text">59 TAHREER · ????? · NON-STOP RECITAL</span>
+      </div>
+
+      <h2 class="hero-display-title">
+        <span class="char-fan" style="--fan: -0.8">शा</span><span class="char-fan" style="--fan: -0.4">य</span><span class="char-fan" style="--fan: 0">री</span>
+        <span class="hero-by-tag">by</span>
+        <span class="hero-author-tag">Shazo</span>
+      </h2>
+
+      <div class="hero-road-divider">
+        <span class="road-divider-line"></span>
+        <span class="road-divider-text">रात, चाय और क़लम के शेर · NH 48</span>
+        <span class="road-divider-line"></span>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="hero-actions-row">
+        <button class="hero-pill-btn primary" id="btn-hero-play" title="शायरी सुनें (AI आवाज़)">
+          <span class="pill-icon">▶</span>
+          <span class="pill-text">शेर सुनें (Play)</span>
+        </button>
+        <button class="hero-pill-btn secondary" id="btn-hero-random" title="रैंडम शेर पढ़ें">
+          <span class="pill-icon">🎲</span>
+          <span class="pill-text">रैंडम शेर</span>
+        </button>
+        <button class="hero-pill-btn chai" id="btn-hero-about" title="शायर से मिलें (About)">
+          <span class="pill-icon">☕</span>
+          <span class="pill-text">शायर से मिलें</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Views Container -->
+  <main class="main-content">
+
+    <!-- 1. VIEW: DIGITAL DIARY (Page Flip Book) -->
+    <section id="view-diary" class="view-panel active">
+      <div class="view-header">
+        <div class="view-header-titles">
+          <span class="view-kicker">Realistic Page Flip</span>
+          <h2 class="view-heading">डायरी के पन्ने</h2>
+          <p class="view-desc">मेरी असली लिखावट के पन्नों को पलटें। स्वाइप करें या क्लिक करके खींचें।</p>
+        </div>
+        <div class="diary-toolbar">
+          <div class="diary-counter" id="diary-page-indicator">सफ़ा 1 / 59</div>
+
+          <!-- Handwriting vs Typed Hindi Text Mode Toggle -->
+          <div class="diary-mode-pill-group" role="group" aria-label="हस्तलिखित पन्ना या मुद्रित टेक्स्ट चुनें">
+            <button class="diary-mode-pill active" id="btn-diary-handwritten" title="हस्तलिखित पन्ना देखें [T]">
+              <span>✍️ लिखावट</span>
+            </button>
+            <button class="diary-mode-pill" id="btn-diary-typed" title="मुद्रित देवनागरी टेक्स्ट देखें [T]">
+              <span>📄 टेक्स्ट</span>
+            </button>
+          </div>
+
+          <div class="diary-controls">
+            <button class="ctrl-btn" id="diary-prev-btn" title="पिछला सफ़ा (Previous Page)">← पिछला</button>
+            <button class="ctrl-btn" id="diary-next-btn" title="अगला सफ़ा (Next Page)">अगला →</button>
+            <button class="ctrl-btn" id="diary-fullscreen-btn" title="फुलस्क्रीन देखें">⛶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Book Container -->
+      <div class="book-viewport" id="book-viewport">
+        <div class="book-spine-shadow"></div>
+        <div id="flipbook" class="flipbook">
+          <!-- Flip pages will be dynamically injected here -->
+        </div>
+      </div>
+
+      <!-- Active Page Meta & Quick Actions below flipbook -->
+      <div class="diary-bottom-bar" id="diary-active-meta">
+        <div class="active-verse-info">
+          <span class="verse-mood-tag" id="diary-verse-mood">इश्क़</span>
+          <h3 class="verse-title" id="diary-verse-title">मेरा रब फरमाता है</h3>
+        </div>
+        <div class="diary-action-row">
+          <div class="inline-audio-player" id="diary-audio-wrapper">
+            <!-- Audio play button with wave animation -->
+            <button class="audio-play-pill" id="diary-play-btn" title="यह शेर सुनें [Space]">
+              <span class="play-icon">▶</span>
+              <span class="play-text">शेर सुनें</span>
+              <div class="audio-pulse-bars">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </button>
+          </div>
+
+          <!-- WhatsApp Share Button -->
+          <button class="diary-action-pill btn-wa-share" id="diary-wa-share-btn" title="व्हाट्सएप पर यह शेर शेयर करें">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M20.5 3.5A11.9 11.9 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6A11.9 11.9 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22a9.9 9.9 0 0 1-5.1-1.4l-.4-.2-3.8 1 1-3.7-.2-.4A9.9 9.9 0 1 1 22 12c0 5.5-4.5 10-10 10Zm5.4-7.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.2.3-.4.4-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.8c0 1.6 1.2 3.2 1.4 3.4.2.2 2.4 3.7 5.8 5.1.8.4 1.4.6 1.9.7.8.3 1.6.2 2.2.1.7-.1 1.8-.7 2-1.4.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.4Z"/></svg>
+            <span>WhatsApp</span>
+          </button>
+
+          <!-- Instagram Story Card Generator -->
+          <button class="diary-action-pill btn-story-share" id="diary-share-btn" title="1080×1920 इंस्टाग्राम स्टोरी कार्ड बनाएं">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect width="18" height="18" x="3" y="3" rx="4"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+            <span>स्टोरी कार्ड</span>
+          </button>
+
+          <!-- Favourite / Bookmark Toggle -->
+          <button class="diary-action-pill btn-fav-toggle" id="diary-bookmark-btn" title="पसंदीदा शेर में जोड़ें [F]" aria-label="Favourite this shayari">
+            <svg class="heart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span id="diary-fav-label">पसंद</span>
+          </button>
+
+          <!-- Open Fullscreen Modal -->
+          <button class="diary-action-pill btn-open-modal" id="diary-view-text-btn" title="बड़ा करके देखें">
+            <span>📜 तहरीर</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. VIEW: MOOD ROOMS -->
+    <section id="view-moods" class="view-panel">
+      <div class="mood-room-container" id="mood-room-container">
+        <!-- Canvas for ambient mood effect (rain / steam / glow / embers / rays) -->
+        <canvas id="mood-ambient-canvas" class="mood-ambient-canvas"></canvas>
+
+        <div class="view-header">
+          <div class="view-header-titles">
+            <span class="view-kicker">Atmospheric Experience</span>
+            <h2 class="view-heading">मूड रूम्स (Mood Rooms)</h2>
+            <p class="view-desc">दिल की हालत चुनें। हर कमरे की अपनी फ़ज़ा, अपनी धुन और अपने शेर हैं।</p>
+          </div>
+        </div>
+
+        <!-- Mood Selector Chips -->
+        <div class="mood-chips-scroller">
+          <div class="mood-chips-container" role="tablist">
+            <button class="mood-chip active" data-mood="Ishq">
+              <span class="mood-icon">💖</span>
+              <span class="mood-name">इश्क़</span>
+              <span class="mood-en">Ishq</span>
+            </button>
+            <button class="mood-chip" data-mood="Judaai">
+              <span class="mood-icon">🌧️</span>
+              <span class="mood-name">जुदाई</span>
+              <span class="mood-en">Judaai</span>
+            </button>
+            <button class="mood-chip" data-mood="Dard">
+              <span class="mood-icon">🥀</span>
+              <span class="mood-name">दर्द</span>
+              <span class="mood-en">Dard</span>
+            </button>
+            <button class="mood-chip" data-mood="Umeed">
+              <span class="mood-icon">🌅</span>
+              <span class="mood-name">उम्मीद</span>
+              <span class="mood-en">Umeed</span>
+            </button>
+            <button class="mood-chip" data-mood="Chai-wali-raatein">
+              <span class="mood-icon">☕</span>
+              <span class="mood-name">चाय वाली रातें</span>
+              <span class="mood-en">Chai-wali-raatein</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mood Room Banner / Description -->
+        <div class="room-banner" id="room-banner">
+          <div class="room-banner-glow"></div>
+          <div class="room-banner-content">
+            <h3 class="room-theme-title" id="room-title">इश्क़ का कमरा</h3>
+            <p class="room-theme-desc" id="room-desc">जहाँ मोहब्बत, इबादत और अपनों के लिए दिल की धड़कनें लफ्ज़ बन जाती
+              हैं।</p>
+            <div class="room-meta">
+              <span id="room-count">14 शायरियां</span>
+              <span class="room-dot">•</span>
+              <span id="room-fx-label">गुलाबी नूर व तितलियां</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shayaris Grid for Selected Mood -->
+        <div class="mood-shayaris-grid" id="mood-shayaris-grid">
+          <!-- Injected via moods.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. VIEW: MIDNIGHT SKY (Constellations) -->
+    <section id="view-sky" class="view-panel">
+      <div class="sky-wrapper">
+        <div class="sky-overlay-header">
+          <div class="sky-titles">
+            <span class="view-kicker">Interactive Constellation</span>
+            <h2 class="view-heading">आधी रात का आसमाँ</h2>
+            <p class="view-desc">हर सितारा एक शेर है। एक ही मिज़ाज के सितारे मिलकर नक्षत्र (Constellation) बनाते हैं।
+              किसी भी सितारे को छुएं।</p>
+          </div>
+          <!-- Constellation Legend -->
+          <div class="constellation-legend">
+            <span class="legend-item" data-mood="Ishq"><span class="legend-dot dot-ishq"></span> इश्क़</span>
+            <span class="legend-item" data-mood="Judaai"><span class="legend-dot dot-judaai"></span> जुदाई</span>
+            <span class="legend-item" data-mood="Dard"><span class="legend-dot dot-dard"></span> दर्द</span>
+            <span class="legend-item" data-mood="Umeed"><span class="legend-dot dot-umeed"></span> उम्मीद</span>
+            <span class="legend-item" data-mood="Chai-wali-raatein"><span class="legend-dot dot-chai"></span> चाय वाली
+              रातें</span>
+          </div>
+        </div>
+
+        <!-- Canvas for Sky and Stars -->
+        <div class="sky-canvas-container" id="sky-canvas-container">
+          <canvas id="sky-canvas"></canvas>
+          <div class="sky-tooltip" id="sky-tooltip">
+            <div class="tooltip-mood" id="tooltip-mood">इश्क़</div>
+            <div class="tooltip-title" id="tooltip-title">मोहब्बत की जगह</div>
+            <div class="tooltip-hint">पढ़ने के लिए क्लिक करें ✦</div>
+          </div>
+          <div class="sky-hint-pill">✨ ज़ूम व ड्रैग करें या किसी सितारे पर टैप करें</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. VIEW: CHAI TAPRI WALL (Pinned Notes) -->
+    <section id="view-wall" class="view-panel">
+      <div class="wall-wrapper">
+        <div class="view-header">
+          <div class="view-header-titles">
+            <span class="view-kicker">Rustic Chai Tapri</span>
+            <h2 class="view-heading">चाय टपरी की दीवार</h2>
+            <p class="view-desc">काग़ज़ के टुकड़ों पर लिखे शेर, जैसे किसी नुक्कड़ की चाय दुकान की तख्ती पर टंगे हों।</p>
+          </div>
+          <!-- Wall Filter Chips -->
+          <div class="wall-filter-row">
+            <button class="wall-filter-btn active" data-filter="all">सब (59)</button>
+            <button class="wall-filter-btn" data-filter="Ishq">इश्क़</button>
+            <button class="wall-filter-btn" data-filter="Judaai">जुदाई</button>
+            <button class="wall-filter-btn" data-filter="Dard">दर्द</button>
+            <button class="wall-filter-btn" data-filter="Umeed">उम्मीद</button>
+            <button class="wall-filter-btn" data-filter="Chai-wali-raatein">चाय वाली रातें</button>
+          </div>
+        </div>
+
+        <!-- The Wall Board -->
+        <div class="tapri-wall-board" id="tapri-wall-board">
+          <!-- Pinned notes injected via wall.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== BUSDRIVER-STYLE FLOATING PLAYER DOCK & QUEUE DRAWER ==================== -->
+  <div class="dock-container" id="dock-container">
+
+    <!-- Expandable Playlist / Queue Drawer (pops up from the player dock) -->
+    <div class="queue-drawer" id="queue-drawer" aria-hidden="true">
+      <div class="queue-drawer-header">
+        <div class="queue-top-row">
+          <div class="queue-heading">
+            <span class="queue-badge" id="queue-badge">59 शे'र</span>
+            <h3 class="queue-title">शायरी की फ़ेहरिस्त (Playlist)</h3>
+          </div>
+          <button class="queue-close-btn" id="queue-close-btn" aria-label="बंद करें (Close Drawer)" title="Close (Esc)">✕</button>
+        </div>
+
+        <!-- Mood Route Filters (Like bus routes in busdriver.wtf) -->
+        <div class="queue-routes-rail">
+          <button class="route-pill active" data-filter="all">सब (59)</button>
+          <button class="route-pill" data-filter="favs" id="queue-favs-pill">♥ पसंदीदा (<span id="favs-badge-count">0</span>)</button>
+          <button class="route-pill" data-filter="Ishq">💖 इश्क़ (14)</button>
+          <button class="route-pill" data-filter="Judaai">🌧️ जुदाई (12)</button>
+          <button class="route-pill" data-filter="Dard">🥀 दर्द (11)</button>
+          <button class="route-pill" data-filter="Umeed">🌅 उम्मीद (12)</button>
+          <button class="route-pill" data-filter="Chai-wali-raatein">☕ चाय रातें (10)</button>
+        </div>
+
+        <!-- Instant Search Input -->
+        <div class="queue-search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="queue-search-input" placeholder="शेर या उनवान खोजें... (Search tracks)" autocomplete="off">
+          <button class="search-clear-btn" id="queue-search-clear" style="display:none">✕</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Track List of 59 items -->
+      <ul class="queue-track-list scrollbar-slim" id="queue-track-list">
+        <!-- Rendered dynamically via js/audio-player.js -->
+      </ul>
+
+      <!-- Queue Drawer Footer Actions -->
+      <div class="queue-drawer-footer">
+        <button class="queue-foot-pill" id="queue-shuffle-btn">
+          <span>🔀 रैंडम शेर चलाएं (Shuffle)</span>
+        </button>
+        <button class="queue-foot-pill" id="queue-share-btn">
+          <span>📤 शेयर कार्ड</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- The Floating Pill Player Dock -->
+    <div class="floating-dock" id="floating-dock">
+      <!-- Left: Rotating Vinyl / Thumbnail Avatar -->
+      <div class="dock-avatar-btn" id="dock-avatar-btn" title="बड़ा करके देखें / Open Fullscreen Reader">
+        <div class="dock-disc" id="dock-disc">
+          <img src="images/01.webp" alt="Now Playing" id="dock-thumb" class="dock-thumb">
+          <span class="disc-spindle"></span>
+        </div>
+      </div>
+
+      <!-- Middle: Track Metadata & Live Scrubber -->
+      <div class="dock-meta-col">
+        <div class="dock-meta-top">
+          <span class="dock-title" id="dock-title">मेरा रब फरमाता है</span>
+          <span class="dock-sep">•</span>
+          <span class="dock-mood-pill" id="dock-mood">इश्क़</span>
+          <span class="dock-mode-indicator" id="dock-mode-indicator">✨ AI पाठ</span>
+        </div>
+
+        <!-- Live Progress Scrubber -->
+        <div class="dock-scrubber-row">
+          <span class="dock-time-label" id="dock-time-curr">0:00</span>
+          <div class="dock-progress-track" id="dock-progress-track">
+            <div class="dock-progress-fill" id="dock-progress-fill" style="width: 0%;"></div>
+            <input type="range" class="dock-progress-slider" id="dock-scrubber" min="0" max="100" value="0" step="0.1" aria-label="Audio seeker">
+          </div>
+          <span class="dock-time-label" id="dock-time-dur">AI पाठ</span>
+        </div>
+      </div>
+
+      <!-- Right: Playback Controls & Drawer Trigger -->
+      <div class="dock-actions-col">
+        <button class="dock-icon-btn btn-prev" id="dock-prev-btn" title="पिछला शेर (Previous) [P]">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M18.9 7.06a.8.8 0 0 0-1.23-.68l-8 4.94a.8.8 0 0 0 0 1.36l8 4.94a.8.8 0 0 0 1.23-.68V7.06Z"/><rect x="5" y="6" width="2.4" height="12" rx="1.2"/></svg>
+        </button>
+
+        <button class="dock-main-play-btn" id="dock-play-btn" title="सुने / रोकें (Play/Pause) [Space]">
+          <span class="dock-main-icon" id="dock-play-icon">▶</span>
+        </button>
+
+        <button class="dock-icon-btn btn-next" id="dock-next-btn" title="अगला शेर (Next) [N]">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M5.1 7.06a.8.8 0 0 1 1.23-.68l8 4.94a.8.8 0 0 1 0 1.36l-8 4.94a.8.8 0 0 1-1.23-.68V7.06Z"/><rect x="16.6" y="6" width="2.4" height="12" rx="1.2"/></svg>
+        </button>
+
+        <button class="dock-icon-btn btn-queue" id="dock-queue-btn" title="शे'र सूची खोलें (Queue Drawer) [Q]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M4 7h11M4 12h11M4 17h7"/><circle cx="18" cy="17" r="2.2" fill="currentColor"/></svg>
+        </button>
+
+        <button class="dock-icon-btn btn-expand" id="dock-expand-btn" title="पूरी लिखावट मोडल में खोलें">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="15" height="15"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </button>
+
+        <button class="dock-icon-btn btn-collapse" id="dock-collapse-btn" title="प्लेयर छोटा / बड़ा करें (Toggle Mini Mode) [M]" aria-label="Toggle Mini Mode">
+          <svg class="icon-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+          <svg class="icon-maximize" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Keyboard Shortcuts Helper -->
+    <div class="dock-shortcuts-bar">
+      <span class="shortcut-tag"><kbd>Space</kbd> सुनाएं / रोकें</span>
+      <span class="shortcut-tag"><kbd>N</kbd> अगला शेर</span>
+      <span class="shortcut-tag"><kbd>P</kbd> पिछला शेर</span>
+      <span class="shortcut-tag"><kbd>Q</kbd> सूची (Queue)</span>
+      <span class="shortcut-tag"><kbd>R</kbd> रैंडम</span>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <p class="footer-quote">"तहरीर एक खामोश आवाज़ और कलम हाथ की जबान है।"</p>
+        <p class="footer-byline">Handwritten verses written & voiced by <strong>?????</strong> (Shazo)</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://abutalha09.vercel.app" target="_blank" rel="noopener noreferrer" class="portfolio-btn">
+          <span>पोर्टफोलियो देखें</span>
+          <span class="btn-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Fullscreen Shayari Reader Modal -->
+  <div class="modal-backdrop" id="reader-modal" aria-hidden="true" role="dialog">
+    <div class="reader-modal-sheet" id="reader-modal-sheet">
+      <!-- Modal Header -->
+      <div class="reader-modal-header">
+        <div class="reader-meta">
+          <span class="reader-mood-pill" id="reader-mood">इश्क़</span>
+          <span class="reader-id-pill" id="reader-id">#01</span>
+          <h2 class="reader-title" id="reader-title">मेरा रब फरमाता है</h2>
+        </div>
+        <div class="reader-header-actions">
+          <button class="modal-icon-btn btn-modal-wa" id="reader-wa-btn" title="व्हाट्सएप पर शेयर करें">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M20.5 3.5A11.9 11.9 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6A11.9 11.9 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22a9.9 9.9 0 0 1-5.1-1.4l-.4-.2-3.8 1 1-3.7-.2-.4A9.9 9.9 0 1 1 22 12c0 5.5-4.5 10-10 10Zm5.4-7.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.2.3-.4.4-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.8c0 1.6 1.2 3.2 1.4 3.4.2.2 2.4 3.7 5.8 5.1.8.4 1.4.6 1.9.7.8.3 1.6.2 2.2.1.7-.1 1.8-.7 2-1.4.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.4Z"/></svg>
+          </button>
+          <button class="modal-icon-btn btn-modal-fav" id="reader-fav-btn" title="पसंदीदा (Bookmark)">
+            <svg class="heart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </button>
+          <button class="modal-icon-btn" id="reader-share-btn" title="इंस्टाग्राम स्टोरी कार्ड बनाएं">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect width="18" height="18" x="3" y="3" rx="4"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+          </button>
+          <button class="modal-icon-btn" id="reader-close-btn" title="बंद करें (Esc)">
+            <span>✕</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="reader-modal-body">
+        <!-- Handwritten Image Area -->
+        <div class="reader-image-card">
+          <div class="image-wrapper" id="reader-image-wrapper">
+            <img id="reader-image" src="" alt="Handwritten Shayari by Shazo" loading="lazy">
+            <div class="image-paper-overlay"></div>
+          </div>
+          <div class="image-zoom-hint">दबाकर बड़ा करें / Double tap to inspect</div>
+        </div>
+
+        <!-- Voice Mode Bar (Audio Player & AI Auto-Reader) -->
+        <div class="reader-voice-section" id="reader-voice-section">
+          <div class="voice-header-row">
+            <div class="voice-title-col">
+              <span class="voice-badge">🎙️ Voice Mode</span>
+              <span class="voice-sub" id="voice-artist">शारजो की शायरी सुनें</span>
+            </div>
+
+            <!-- Voice Source Toggle (AI vs Real Voice) -->
+            <div class="voice-mode-toggle-group">
+              <button class="voice-mode-pill active" id="btn-mode-ai" title="ब्राउज़र द्वारा अपने आप सुनाएं (AI TTS)">
+                <span>✨ AI पाठ</span>
+              </button>
+              <button class="voice-mode-pill" id="btn-mode-real" title="शारजो की असली आवाज़">
+                <span>🎙️ असली आवाज़</span>
+              </button>
+            </div>
+
+            <div class="voice-autoplay-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" id="voice-autoplay-next" checked>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">अगला अपने-आप (Auto-Next)</span>
+            </div>
+          </div>
+
+          <!-- Player Controls -->
+          <div class="voice-player-bar" id="voice-player-bar">
+            <button class="voice-play-circle" id="voice-play-circle" aria-label="Play Voice Recording">
+              <span class="play-symbol" id="voice-play-symbol">▶</span>
+            </button>
+
+            <div class="voice-track-info">
+              <!-- Live Visualizer / Waveform -->
+              <div class="waveform-container" id="waveform-container">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+              </div>
+
+              <!-- Progress Scrubber & Rate Pills -->
+              <div class="progress-wrapper">
+                <input type="range" class="voice-scrubber" id="voice-scrubber" min="0" max="100" value="0" step="0.1">
+                <div class="time-row">
+                  <span class="time-curr" id="voice-time-curr">0:00</span>
+                  <div class="speed-control-group">
+                    <span class="speed-label">रफ़्तार:</span>
+                    <button class="speed-chip active" id="speed-chip-slow" data-rate="0.85">0.85x शायराना</button>
+                    <button class="speed-chip" id="speed-chip-norm" data-rate="1.0">1.0x</button>
+                  </div>
+                  <span class="time-dur" id="voice-time-dur">AI पाठ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Status / Helper Message -->
+          <div class="voice-status-box" id="voice-status-box">
+            <span class="status-icon">✨</span>
+            <span class="status-text" id="voice-status-text">
+              यदि आप पढ़ना नहीं चाहते, तो <strong>प्ले (▶) बटन</strong> दबाएं — यह शेर आपके लिए अपने आप पढ़ा जाएगा।
+            </span>
+          </div>
+        </div>
+
+        <!-- Transcribed Text Area (Typed text beside / below image) -->
+        <div class="reader-text-section" id="reader-text-section">
+          <div class="text-section-header">
+            <span class="text-label">📜 मुद्रित तहरीर (Typed Text)</span>
+            <button class="copy-text-btn" id="reader-copy-text-btn">
+              <span>📋</span> <span id="copy-text-label">नक़ल करें (Copy)</span>
+            </button>
+          </div>
+          <div class="typed-text-box" id="reader-typed-text">
+            <!-- Transcribed Hindi text -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Bottom Navigation (Prev / Next) -->
+      <div class="reader-modal-footer">
+        <button class="nav-prev-btn" id="reader-prev-btn">
+          <span class="arrow">←</span> पिछला शेर
+        </button>
+        <span class="footer-counter" id="reader-counter">1 / 59</span>
+        <button class="nav-next-btn" id="reader-next-btn">
+          अगला शेर <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Share Card Generator Modal (1080x1920 Instagram Story) -->
+  <div class="modal-backdrop" id="share-modal" aria-hidden="true" role="dialog">
+    <div class="share-modal-sheet">
+      <div class="share-modal-header">
+        <div class="share-titles">
+          <h3>इंस्टाग्राम स्टोरी कार्ड (1080×1920)</h3>
+          <p>कहानी या स्टेटस पर लगाने के लिए खूबसूरत कार्ड तैयार है।</p>
+        </div>
+        <button class="modal-icon-btn" id="share-modal-close">✕</button>
+      </div>
+
+      <div class="share-card-preview-area">
+        <div class="canvas-phone-frame">
+          <canvas id="share-canvas" width="1080" height="1920"></canvas>
+        </div>
+      </div>
+
+      <div class="share-modal-actions">
+        <button class="primary-action-btn" id="btn-download-story">
+          <span>📥</span> <span>तस्वीर डाउनलोड करें (PNG)</span>
+        </button>
+        <button class="secondary-action-btn" id="btn-native-share">
+          <span>📲</span> <span>शेयर करें (Share Sheet)</span>
+        </button>
+        <button class="secondary-action-btn" id="btn-copy-link">
+          <span>🔗</span> <span id="copy-link-label">लिंक कॉपी करें</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. About the Poet Modal -->
+  <div class="modal-backdrop" id="about-modal" aria-hidden="true" role="dialog">
+    <div class="about-modal-sheet">
+      <div class="about-header">
+        <div class="about-avatar">ش</div>
+        <div class="about-names">
+          <h2>मोहम्मद अबू तल्हा (Shazo)</h2>
+          <p>शायर, लेखक और डेवलपर</p>
+        </div>
+        <button class="modal-icon-btn" id="about-modal-close">✕</button>
+      </div>
+
+      <div class="about-body">
+        <div class="about-quote">
+          "हर सफ़ा एक अहसास है, हर लफ़्ज़ एक दास्तान। यह डायरी काग़ज़ पर उकेरे हुए वो जज़्बात हैं जो मैंने तन्हाइयों और
+          महफ़िलों में जिए हैं।"
+        </div>
+
+        <p>
+          इस वेबसाइट में मौजूद सभी शायरियां मेरी निजी डायरी के पन्नों से हैं, जिन्हें मैंने अपने हाथों से लिखा है और
+          अपनी असली आवाज़ में रिकॉर्ड किया है।
+        </p>
+
+        <div class="about-features-list">
+          <div class="feat-item">
+            <span class="feat-icon">📖</span>
+            <div>
+              <strong>डिजिटल डायरी:</strong> पन्ने पलट कर मेरी असली लिखावट पढ़ें।
+            </div>
+          </div>
+          <div class="feat-item">
+            <span class="feat-icon">🎭</span>
+            <div>
+              <strong>5 मूड रूम्स:</strong> इश्क़, जुदाई, दर्द, उम्मीद और चाय वाली रातें।
+            </div>
+          </div>
+          <div class="feat-item">
+            <span class="feat-icon">🎙️</span>
+            <div>
+              <strong>मेरी आवाज़:</strong> हर शेर को मेरी असली आवाज़ और तरंगों के साथ सुनें।
+            </div>
+          </div>
+          <div class="feat-item">
+            <span class="feat-icon">✨</span>
+            <div>
+              <strong>आधी रात का आसमाँ:</strong> सितारों के नक्षत्रों में खो जाएं।
+            </div>
+          </div>
+        </div>
+
+        <div class="portfolio-card-box">
+          <p class="portfolio-intro">मेरे अन्य प्रोजेक्ट्स, सॉफ़्टवेयर और लेख देखने के लिए:</p>
+          <a href="https://abutalha09.vercel.app" target="_blank" rel="noopener noreferrer" class="portfolio-link-card">
+            <span class="link-title">abutalha09.vercel.app</span>
+            <span class="link-arrow">विज़िट करें ↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Audio Element for Voice Mode -->
+  <audio id="global-voice-audio" preload="none"></audio>
+
+  <!-- Floating Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- External Libraries -->
+  <!-- StPageFlip for realistic 3D book page flipping -->
+  <script src="lib/page-flip.browser.js"></script>
+
+  <!-- Shayaris Data: Synchronous injection ensures it always works offline via file:// and on Vercel -->
+  <script src="data/shayaris-data.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="js/audio-player.js"></script>
+  <script src="js/share-card.js"></script>
+  <script src="js/views/diary.js"></script>
+  <script src="js/views/moods.js"></script>
+  <script src="js/views/sky.js"></script>
+  <script src="js/views/wall.js"></script>
+  <script src="js/modal-reader.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
