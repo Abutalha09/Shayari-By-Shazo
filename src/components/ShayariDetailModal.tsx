@@ -252,3 +252,4 @@ export const ShayariDetailModal: React.FC<ShayariDetailModalProps> = ({
     </div>
   );
 };
+
