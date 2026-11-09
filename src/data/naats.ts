@@ -14,6 +14,19 @@ export interface Naat {
 
 export const NAATS_DATA: Naat[] = [
   {
+    id: "naat-meray-nabi-pyare-nabi",
+    title: "मेरे नबी प्यारे नबी ﷺ",
+    titleUrdu: "میرے نبی پیارے نبی",
+    englishTitle: "Meray Nabi Pyare Nabi",
+    khawan: "रूहानी तराना",
+    category: "नात-ए-रसूल ﷺ",
+    audio: "audio/meray-nabi-pyare-nabi.mp3",
+    sher: "मेरे नबी प्यारे नबी, सबसे हसीन सबसे जुदा।\nचाँद से भी बढ़कर चमकता है चेहरा आपका।",
+    duration: "5:44",
+    themeColor: "#0d9488",
+    bgGradient: "from-cyan-950/80 via-teal-950/40 to-[#120d0a]",
+  },
+  {
     id: "naat-faslo-ko-takalluf",
     title: "फासलों को तकल्लुफ है हम से अगर",
     titleUrdu: "فاصلوں کو تکلف ہے ہم سے اگر",
@@ -142,19 +155,6 @@ export const NAATS_DATA: Naat[] = [
     duration: "6:35",
     themeColor: "#059669",
     bgGradient: "from-teal-950/80 via-emerald-950/40 to-[#120d0a]",
-  },
-  {
-    id: "naat-meray-nabi-pyare-nabi",
-    title: "मेरे नबी प्यारे नबी ﷺ",
-    titleUrdu: "میرے نبی پیارے نبی",
-    englishTitle: "Meray Nabi Pyare Nabi",
-    khawan: "रूहानी तराना",
-    category: "नात-ए-रसूल ﷺ",
-    audio: "audio/meray-nabi-pyare-nabi.mp3",
-    sher: "मेरे नबी प्यारे नबी, सबसे हसीन सबसे जुदा।\nचाँद से भी बढ़कर चमकता है चेहरा आपका।",
-    duration: "5:44",
-    themeColor: "#0d9488",
-    bgGradient: "from-cyan-950/80 via-teal-950/40 to-[#120d0a]",
   },
   {
     id: "naat-allah-shahe-baghdad",
