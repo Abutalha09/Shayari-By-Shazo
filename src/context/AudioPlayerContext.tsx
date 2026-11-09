@@ -10,9 +10,12 @@ import React, {
   ReactNode,
 } from "react";
 import { Shayari, SHAYARIS_DATA } from "@/data/shayari";
+import { Naat, NAATS_DATA } from "@/data/naats";
 
 interface AudioPlayerContextType {
   activeShayari: Shayari | null;
+  activeNaat: Naat | null;
+  currentTrackType: "shayari" | "naat";
   isPlaying: boolean;
   isPaused: boolean;
   currentTime: number;
@@ -23,6 +26,7 @@ interface AudioPlayerContextType {
   favorites: number[];
   lastReadPage: number;
   playShayari: (shayari: Shayari) => void;
+  playNaat: (naat: Naat) => void;
   pause: () => void;
   resume: () => void;
   togglePlay: () => void;
@@ -131,6 +135,8 @@ const ambientDrone = typeof window !== "undefined" ? new AmbientHarmonicDrone() 
 export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Default to first shayari so player is immediately accessible
   const [activeShayari, setActiveShayari] = useState<Shayari | null>(() => SHAYARIS_DATA[0]);
+  const [activeNaat, setActiveNaat] = useState<Naat | null>(null);
+  const [currentTrackType, setCurrentTrackType] = useState<"shayari" | "naat">("shayari");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -369,6 +375,7 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
     (shayari: Shayari) => {
       stopAllPlayback();
       setActiveShayari(shayari);
+      setCurrentTrackType("shayari");
       setLastReadPage(shayari.page);
       // Auto-expand player when user starts listening
       setIsMini(false);
@@ -426,6 +433,62 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
     [stopAllPlayback, playSpeech, autoPlayNext]
   );
 
+  const playNaat = useCallback(
+    (naat: Naat) => {
+      stopAllPlayback();
+      setActiveNaat(naat);
+      setCurrentTrackType("naat");
+      setIsMini(false);
+      setIsSpeechMode(false);
+
+      const safeUrl = encodeURI(naat.audio);
+      const audio = new Audio(safeUrl);
+      audioRef.current = audio;
+
+      audio.onloadedmetadata = () => {
+        setDuration(audio.duration || 240);
+      };
+
+      audio.ontimeupdate = () => {
+        setCurrentTime(audio.currentTime);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        isPlayingRef.current = false;
+        setIsPaused(false);
+        if (autoPlayNext) {
+          if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
+          autoNextTimeoutRef.current = setTimeout(() => {
+            const curIdx = NAATS_DATA.findIndex((n) => n.id === naat.id);
+            const nextIdx = (curIdx + 1) % NAATS_DATA.length;
+            playNaat(NAATS_DATA[nextIdx]);
+          }, 800);
+        }
+      };
+
+      audio.onerror = (e) => {
+        console.warn(`Audio playback error for naat ${naat.audio}`, e);
+        setIsPlaying(false);
+        isPlayingRef.current = false;
+      };
+
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          isPlayingRef.current = true;
+          setIsPaused(false);
+        })
+        .catch((err) => {
+          console.warn("Audio play promise error", err);
+          setIsPlaying(false);
+          isPlayingRef.current = false;
+        });
+    },
+    [stopAllPlayback, autoPlayNext]
+  );
+
   const pause = useCallback(() => {
     if (audioRef.current && isPlaying) {
       audioRef.current.pause();
@@ -448,6 +511,8 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
       setIsPlaying(true);
       isPlayingRef.current = true;
       setIsPaused(false);
+    } else if (currentTrackType === "naat" && activeNaat) {
+      playNaat(activeNaat);
     } else if (typeof window !== "undefined" && window.speechSynthesis && isPaused) {
       window.speechSynthesis.resume();
       ambientDrone?.start();
@@ -462,13 +527,15 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
     } else if (activeShayari) {
       playShayari(activeShayari);
     }
-  }, [isPaused, activeShayari, currentTime, playShayari]);
+  }, [isPaused, currentTrackType, activeNaat, playNaat, activeShayari, currentTime, playShayari]);
 
   const togglePlay = useCallback(() => {
     if (isPlaying) {
       pause();
     } else if (isPaused) {
       resume();
+    } else if (currentTrackType === "naat" && activeNaat) {
+      playNaat(activeNaat);
     } else if (activeShayari) {
       playShayari(activeShayari);
     } else {
@@ -476,21 +543,33 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
         SHAYARIS_DATA.find((s) => s.page === lastReadPage) || SHAYARIS_DATA[0];
       playShayari(initial);
     }
-  }, [isPlaying, isPaused, activeShayari, lastReadPage, pause, resume, playShayari]);
+  }, [isPlaying, isPaused, currentTrackType, activeNaat, playNaat, activeShayari, lastReadPage, pause, resume, playShayari]);
 
   const nextShayari = useCallback(() => {
+    if (currentTrackType === "naat" && activeNaat) {
+      const curIdx = NAATS_DATA.findIndex((n) => n.id === activeNaat.id);
+      const nextIdx = (curIdx + 1) % NAATS_DATA.length;
+      playNaat(NAATS_DATA[nextIdx]);
+      return;
+    }
     const curId = activeShayari ? activeShayari.id : 0;
     const curIdx = SHAYARIS_DATA.findIndex((s) => s.id === curId);
     const nextIdx = (curIdx + 1) % SHAYARIS_DATA.length;
     playShayari(SHAYARIS_DATA[nextIdx]);
-  }, [activeShayari, playShayari]);
+  }, [currentTrackType, activeNaat, playNaat, activeShayari, playShayari]);
 
   const prevShayari = useCallback(() => {
+    if (currentTrackType === "naat" && activeNaat) {
+      const curIdx = NAATS_DATA.findIndex((n) => n.id === activeNaat.id);
+      const prevIdx = (curIdx - 1 + NAATS_DATA.length) % NAATS_DATA.length;
+      playNaat(NAATS_DATA[prevIdx]);
+      return;
+    }
     const curId = activeShayari ? activeShayari.id : 1;
     const curIdx = SHAYARIS_DATA.findIndex((s) => s.id === curId);
     const prevIdx = (curIdx - 1 + SHAYARIS_DATA.length) % SHAYARIS_DATA.length;
     playShayari(SHAYARIS_DATA[prevIdx]);
-  }, [activeShayari, playShayari]);
+  }, [currentTrackType, activeNaat, playNaat, activeShayari, playShayari]);
 
   const playRandom = useCallback(() => {
     const randIdx = Math.floor(Math.random() * SHAYARIS_DATA.length);
@@ -576,6 +655,8 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
     <AudioPlayerContext.Provider
       value={{
         activeShayari,
+        activeNaat,
+        currentTrackType,
         isPlaying,
         isPaused,
         currentTime,
@@ -586,6 +667,7 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
         favorites,
         lastReadPage,
         playShayari,
+        playNaat,
         pause,
         resume,
         togglePlay,

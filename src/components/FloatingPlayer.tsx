@@ -26,6 +26,8 @@ function formatTime(seconds: number) {
 export const FloatingPlayer: React.FC = () => {
   const {
     activeShayari,
+    activeNaat,
+    currentTrackType,
     isPlaying,
     currentTime,
     duration,
@@ -43,12 +45,16 @@ export const FloatingPlayer: React.FC = () => {
     seek,
   } = useAudioPlayer();
 
-  if (!activeShayari) {
+  if (!activeShayari && !activeNaat) {
     return null;
   }
 
-  const isFav = isFavorite(activeShayari.id);
+  const isNaat = currentTrackType === "naat" && !!activeNaat;
+  const isFav = activeShayari ? isFavorite(activeShayari.id) : false;
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  const displayTitle = isNaat ? activeNaat.title : `सफ़ा ${activeShayari?.page}: ${activeShayari?.title}`;
+  const displayBadge = isNaat ? activeNaat.category : activeShayari?.mood;
 
   return (
     <aside
@@ -65,7 +71,9 @@ export const FloatingPlayer: React.FC = () => {
               }
               togglePlay();
             }}
-            className="w-8 h-8 rounded-full bg-[#b86b2b] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-md"
+            className={`w-8 h-8 rounded-full text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-md ${
+              isNaat ? "bg-[#059669] hover:bg-[#047857]" : "bg-[#b86b2b]"
+            }`}
             aria-label={isPlaying ? "रोकें" : "सुनें"}
           >
             {isPlaying ? (
@@ -79,10 +87,10 @@ export const FloatingPlayer: React.FC = () => {
             onClick={toggleMini}
             className="cursor-pointer flex items-center gap-2 text-xs"
           >
-            <span className="font-semibold text-[#2d1810] truncate max-w-[140px] sm:max-w-[200px]">
-              सफ़ा {activeShayari.page}: {activeShayari.title}
+            <span className="font-semibold text-[#2d1810] truncate max-w-[140px] sm:max-w-[220px]">
+              {isNaat ? `🌙 ${activeNaat.title}` : displayTitle}
             </span>
-            <span className="text-[10px] text-[#b86b2b] font-mono">
+            <span className={`text-[10px] font-mono ${isNaat ? "text-emerald-700 font-semibold" : "text-[#b86b2b]"}`}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
           </div>
@@ -104,23 +112,31 @@ export const FloatingPlayer: React.FC = () => {
             {/* Top row: Track Details & Badges */}
             <div className="flex items-center justify-between gap-3 mb-2.5">
               <div className="flex items-center gap-3 min-w-0">
-                {/* Rotating Vinyl / Image disc */}
+                {/* Rotating Vinyl / Image disc / Emerald Mosque crescent */}
                 <div
-                  className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-[#b86b2b]/40 shadow-sm flex-shrink-0 ${
-                    isPlaying ? "animate-spin" : ""
-                  }`}
+                  className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 shadow-sm flex-shrink-0 flex items-center justify-center ${
+                    isNaat
+                      ? "border-emerald-600/50 bg-gradient-to-br from-emerald-800 to-emerald-950 text-amber-200"
+                      : "border-[#b86b2b]/40 bg-[#f7f2ea]"
+                  } ${isPlaying ? "animate-spin" : ""}`}
                   style={{ animationDuration: "10s" }}
                 >
-                  <img
-                    src={activeShayari.image}
-                    alt={activeShayari.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      if (activeShayari.fallbackImage) {
-                        (e.currentTarget as HTMLImageElement).src = activeShayari.fallbackImage;
-                      }
-                    }}
-                  />
+                  {isNaat ? (
+                    <Sparkles className="w-5 h-5 text-amber-300" />
+                  ) : (
+                    activeShayari && (
+                      <img
+                        src={activeShayari.image}
+                        alt={activeShayari.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          if (activeShayari.fallbackImage) {
+                            (e.currentTarget as HTMLImageElement).src = activeShayari.fallbackImage;
+                          }
+                        }}
+                      />
+                    )
+                  )}
                   {/* Vinyl center pin */}
                   <div className="absolute inset-0 m-auto w-3 h-3 rounded-full bg-[#f7f2ea] border border-[#b86b2b]" />
                 </div>
@@ -128,14 +144,25 @@ export const FloatingPlayer: React.FC = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs sm:text-sm font-serif font-bold text-[#2d1810] truncate">
-                      सफ़ा {activeShayari.page}: {activeShayari.title}
+                      {isNaat ? activeNaat.title : displayTitle}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f5ece0] text-[#9c5720] border border-[#dec8b2]">
-                      {activeShayari.mood}
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                        isNaat
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : "bg-[#f5ece0] text-[#9c5720] border-[#dec8b2]"
+                      }`}
+                    >
+                      {displayBadge}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-[11px] text-[#6e5548] mt-0.5">
-                    {isSpeechMode ? (
+                    {isNaat ? (
+                      <span className="flex items-center gap-1 text-emerald-700 font-medium truncate">
+                        <Sparkles className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                        <span className="truncate">{activeNaat.khawan} · شازیہ की पसंद</span>
+                      </span>
+                    ) : isSpeechMode ? (
                       <span className="flex items-center gap-1 text-[#b86b2b] font-medium">
                         <Mic className="w-3 h-3" /> AI पाठ (स्वाभाविक वाचन + तानपूरा)
                       </span>
@@ -150,18 +177,20 @@ export const FloatingPlayer: React.FC = () => {
 
               {/* Top actions: Minimize + Fav */}
               <div className="flex items-center gap-1 flex-shrink-0">
-                <button
-                  onClick={() => toggleFavorite(activeShayari.id)}
-                  className={`p-2 rounded-xl transition-all ${
-                    isFav
-                      ? "text-rose-500 bg-rose-50"
-                      : "text-[#7d6456] hover:text-rose-500 hover:bg-[#f5ece0]"
-                  }`}
-                  title={isFav ? "पसंदीदा से हटाएं" : "पसंदीदा में जोड़ें"}
-                  aria-label="पसंदीदा"
-                >
-                  <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
-                </button>
+                {!isNaat && activeShayari && (
+                  <button
+                    onClick={() => toggleFavorite(activeShayari.id)}
+                    className={`p-2 rounded-xl transition-all ${
+                      isFav
+                        ? "text-rose-500 bg-rose-50"
+                        : "text-[#7d6456] hover:text-rose-500 hover:bg-[#f5ece0]"
+                    }`}
+                    title={isFav ? "पसंदीदा से हटाएं" : "पसंदीदा में जोड़ें"}
+                    aria-label="पसंदीदा"
+                  >
+                    <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
+                  </button>
+                )}
                 <button
                   onClick={toggleMini}
                   className="p-2 rounded-xl text-[#7d6456] hover:text-[#2d1810] hover:bg-[#f5ece0] transition-colors"

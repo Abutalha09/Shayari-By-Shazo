@@ -9,6 +9,7 @@ import { RandomShayariModal } from "@/components/RandomShayariModal";
 import { ShayariDetailModal } from "@/components/ShayariDetailModal";
 import { DiarySection } from "@/components/sections/DiarySection";
 import { MoodsOrbitSection } from "@/components/sections/MoodsOrbitSection";
+import { NaatSection } from "@/components/sections/NaatSection";
 import { SkySection } from "@/components/sections/SkySection";
 import { TapriWallSection } from "@/components/sections/TapriWallSection";
 import { AudioPlayerProvider, useAudioPlayer } from "@/context/AudioPlayerContext";
@@ -31,7 +32,7 @@ const MainContent: React.FC = () => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
 
-      const sections = ["view-diary", "view-moods", "view-sky", "view-wall"];
+      const sections = ["view-diary", "view-moods", "view-naat", "view-sky", "view-wall"];
       const scrollPos = window.scrollY + 200;
 
       for (const sectionId of sections) {
@@ -96,7 +97,10 @@ const MainContent: React.FC = () => {
         {/* Section 2: 5 Moods (Dish Orbit Carousel) */}
         <MoodsOrbitSection />
 
-        {/* Section 3: Midnight Sky (Stars Constellation) */}
+        {/* Section 3: Shazo's Favourite Naat-o-Kalaam */}
+        <NaatSection />
+
+        {/* Section 4: Midnight Sky (Stars Constellation) */}
         <SkySection
           onOpenShareStory={(s) => setShareStoryShayari(s)}
           onSelectShayari={(s) => setDetailShayari(s)}

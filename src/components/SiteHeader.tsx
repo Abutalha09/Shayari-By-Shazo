@@ -13,6 +13,7 @@ import {
   Feather,
   Clock,
   Heart,
+  Music,
 } from "lucide-react";
 import { useAudioPlayer } from "@/context/AudioPlayerContext";
 
@@ -66,6 +67,7 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
   const navLinks = [
     { id: "view-diary", label: "डायरी", icon: BookOpen },
     { id: "view-moods", label: "5 मूड्स", icon: Sparkles },
+    { id: "view-naat", label: "नात-ए-पाक", icon: Music },
     { id: "view-sky", label: "आसमाँ", icon: Moon },
     { id: "view-wall", label: "चाय टपरी", icon: Coffee },
   ];
