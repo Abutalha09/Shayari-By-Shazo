@@ -47,6 +47,51 @@ const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(und
 const STORAGE_FAVS_KEY = "shazo_favs";
 const STORAGE_LAST_PAGE_KEY = "shazo_last_page";
 
+// Helpers for natural speech duration and voice selection
+export function getEstimatedSpeechSeconds(text: string): number {
+  if (!text) return 30;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  // Poetic, natural recital rhythm is ~75 words per minute
+  return Math.max(12, Math.round((words / 75) * 60));
+}
+
+export function parseDurationToSeconds(durationStr?: string): number {
+  if (!durationStr) return 240;
+  const parts = durationStr.split(":").map(Number);
+  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    return parts[0] * 60 + parts[1];
+  }
+  return 240;
+}
+
+function selectBestVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  if (!voices || voices.length === 0) return null;
+  return (
+    voices.find(
+      (v) =>
+        v.lang?.toLowerCase().startsWith("hi") ||
+        v.name?.toLowerCase().includes("hindi") ||
+        v.name?.toLowerCase().includes("madhur") ||
+        v.name?.toLowerCase().includes("swara") ||
+        v.name?.toLowerCase().includes("kalpana") ||
+        v.name?.toLowerCase().includes("neerja") ||
+        v.name?.toLowerCase().includes("kavya")
+    ) ||
+    voices.find(
+      (v) =>
+        v.lang?.toLowerCase().startsWith("ur") ||
+        v.name?.toLowerCase().includes("urdu")
+    ) ||
+    voices.find(
+      (v) =>
+        v.lang?.toLowerCase().startsWith("en-in") ||
+        v.name?.toLowerCase().includes("india")
+    ) ||
+    voices[0] ||
+    null
+  );
+}
+
 // Web Audio Ambient Drone for Warm Poetic Recitation
 class AmbientHarmonicDrone {
   private ctx: AudioContext | null = null;
@@ -54,15 +99,22 @@ class AmbientHarmonicDrone {
   private masterGain: GainNode | null = null;
   private isRunning = false;
 
-  private init() {
-    if (this.ctx) return;
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      this.ctx = new AudioCtx();
-    } catch (e) {
-      console.warn("Web Audio not supported", e);
+  public unlock() {
+    if (!this.ctx) {
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) this.ctx = new AudioCtx();
+      } catch (e) {
+        console.warn("Web Audio not supported", e);
+      }
     }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  private init() {
+    this.unlock();
   }
 
   public start() {
@@ -140,7 +192,9 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(12);
+  const [duration, setDuration] = useState<number>(() => {
+    return getEstimatedSpeechSeconds(SHAYARIS_DATA[0]?.text || "");
+  });
   const [isSpeechMode, setIsSpeechMode] = useState(false);
   const [isMini, setIsMini] = useState(true); // Default to compact pill mode as requested
   const [autoPlayNext, setAutoPlayNext] = useState(true);
@@ -172,6 +226,25 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
   const speechStartTimeRef = useRef<number>(0);
   const speechEstimatedDurRef = useRef<number>(10);
   const isPlayingRef = useRef(false);
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+
+  // Pre-warm SpeechSynthesis voices cache on mount
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const loadVoices = () => {
+      try {
+        const v = window.speechSynthesis.getVoices();
+        if (v && v.length > 0) {
+          voicesRef.current = v;
+        }
+      } catch {}
+    };
+    loadVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+    };
+  }, []);
 
   // Sync favorites to localStorage
   useEffect(() => {
@@ -250,10 +323,12 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
         return;
       }
 
-      // Format text for clear, natural speech reading
+      // 1. Immediately unlock and resume Web Audio during user click gesture
+      ambientDrone?.unlock();
+
+      // 2. Format text for natural speech reading
       const textToSpeak = shayari.text.trim() || shayari.title;
-      const words = textToSpeak.split(/\s+/).length;
-      const estimatedSeconds = Math.max(8, Math.round((words / 100) * 60));
+      const estimatedSeconds = getEstimatedSpeechSeconds(textToSpeak);
       speechEstimatedDurRef.current = estimatedSeconds;
       setDuration(estimatedSeconds);
       setCurrentTime(0);
@@ -262,7 +337,7 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
       isPlayingRef.current = true;
       setIsPaused(false);
 
-      // Start progress timer
+      // 3. Start progress timer
       speechStartTimeRef.current = Date.now();
       if (speechTimerRef.current) clearInterval(speechTimerRef.current);
       speechTimerRef.current = setInterval(() => {
@@ -286,85 +361,73 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
         }
       }, 250);
 
-      // Web Speech Synthesis
-      if (window.speechSynthesis) {
+      // 4. Web Speech Synthesis without delay to preserve User Gesture Activation
+      if ("speechSynthesis" in window) {
         try {
-          window.speechSynthesis.cancel();
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+            window.speechSynthesis.cancel();
+          }
 
-          // Safe delay ensures cancel queue is flushed before speak
-          setTimeout(() => {
-            try {
-              window.speechSynthesis.resume();
-              const utterance = new SpeechSynthesisUtterance(textToSpeak);
-              (window as any).__shazoUtterance = utterance;
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          (window as any).__shazoUtterance = utterance;
 
-              const voices = window.speechSynthesis.getVoices();
-              const hiVoice =
-                voices.find(
-                  (v) =>
-                    v.lang.toLowerCase().startsWith("hi") ||
-                    v.name.toLowerCase().includes("hindi") ||
-                    v.name.toLowerCase().includes("madhur") ||
-                    v.name.toLowerCase().includes("swara") ||
-                    v.name.toLowerCase().includes("kalpana")
-                ) ||
-                voices.find(
-                  (v) =>
-                    v.lang.toLowerCase().startsWith("ur") ||
-                    v.name.toLowerCase().includes("urdu")
-                ) ||
-                voices.find(
-                  (v) =>
-                    v.lang.toLowerCase().startsWith("en-in") ||
-                    v.name.toLowerCase().includes("india")
-                );
+          const voices =
+            voicesRef.current.length > 0
+              ? voicesRef.current
+              : window.speechSynthesis.getVoices();
+          const selectedVoice = selectBestVoice(voices);
 
-              if (hiVoice) {
-                utterance.voice = hiVoice;
-                utterance.lang = hiVoice.lang;
-              } else {
-                utterance.lang = "hi-IN";
-              }
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            utterance.lang = selectedVoice.lang;
+          } else {
+            utterance.lang = "hi-IN";
+          }
 
-              utterance.rate = 0.88;
-              utterance.pitch = 0.98;
+          utterance.rate = 0.88;
+          utterance.pitch = 0.98;
 
-              // Only start ambient tanpura warmth when speech ACTUALLY begins
-              utterance.onstart = () => {
-                ambientDrone?.start();
-              };
+          // Start ambient tanpura sound immediately for acoustic response
+          ambientDrone?.start();
 
-              utterance.onend = () => {
-                if (speechTimerRef.current) clearInterval(speechTimerRef.current);
-                setCurrentTime(estimatedSeconds);
-                setIsPlaying(false);
-                isPlayingRef.current = false;
-                ambientDrone?.stop();
-                if (autoPlayNext) {
-                  if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
-                  autoNextTimeoutRef.current = setTimeout(() => {
-                    const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
-                    const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
-                    playShayari(SHAYARIS_DATA[nextIndex]);
-                  }, 800);
-                }
-              };
+          utterance.onstart = () => {
+            ambientDrone?.start();
+          };
 
-              utterance.onerror = (e) => {
-                console.warn("SpeechSynthesis notice:", e);
-                // On error, immediately stop ambient drone so no background noise is left
-                ambientDrone?.stop();
-              };
-
-              window.speechSynthesis.speak(utterance);
-            } catch (err) {
-              console.warn("SpeechSynthesis trigger error", err);
-              ambientDrone?.stop();
+          utterance.onend = () => {
+            if (speechTimerRef.current) clearInterval(speechTimerRef.current);
+            setCurrentTime(estimatedSeconds);
+            setIsPlaying(false);
+            isPlayingRef.current = false;
+            ambientDrone?.stop();
+            if (autoPlayNext) {
+              if (autoNextTimeoutRef.current) clearTimeout(autoNextTimeoutRef.current);
+              autoNextTimeoutRef.current = setTimeout(() => {
+                const currentIndex = SHAYARIS_DATA.findIndex((s) => s.id === shayari.id);
+                const nextIndex = (currentIndex + 1) % SHAYARIS_DATA.length;
+                playShayari(SHAYARIS_DATA[nextIndex]);
+              }, 800);
             }
-          }, 80);
+          };
+
+          utterance.onerror = (e) => {
+            console.warn("SpeechSynthesis notice:", e);
+            if (speechTimerRef.current) clearInterval(speechTimerRef.current);
+            setIsPlaying(false);
+            isPlayingRef.current = false;
+            ambientDrone?.stop();
+          };
+
+          window.speechSynthesis.speak(utterance);
         } catch (err) {
-          console.warn("SpeechSynthesis init error", err);
+          console.warn("SpeechSynthesis error:", err);
           ambientDrone?.stop();
+          if (speechTimerRef.current) clearInterval(speechTimerRef.current);
+          setIsPlaying(false);
+          isPlayingRef.current = false;
         }
       }
     },
@@ -377,17 +440,21 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
       setActiveShayari(shayari);
       setCurrentTrackType("shayari");
       setLastReadPage(shayari.page);
-      // Auto-expand player when user starts listening
       setIsMini(false);
 
-      // If audio file exists, try playing it
       if (shayari.audio) {
+        setIsSpeechMode(false);
+        setDuration(0);
+        setCurrentTime(0);
+
         const audio = new Audio(shayari.audio);
         audioRef.current = audio;
-        setIsSpeechMode(false);
+        audio.preload = "auto";
 
         audio.onloadedmetadata = () => {
-          setDuration(audio.duration || 12);
+          if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+            setDuration(audio.duration);
+          }
         };
 
         audio.ontimeupdate = () => {
@@ -426,7 +493,7 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
             playSpeech(shayari);
           });
       } else {
-        // No pre-recorded file - synthesize recital
+        // Natural speech recital with warm tanpura drone
         playSpeech(shayari);
       }
     },
@@ -441,12 +508,19 @@ export const AudioPlayerProvider: React.FC<{ children: ReactNode }> = ({ childre
       setIsMini(false);
       setIsSpeechMode(false);
 
+      const parsedDur = parseDurationToSeconds(naat.duration);
+      setDuration(parsedDur);
+      setCurrentTime(0);
+
       const safeUrl = encodeURI(naat.audio);
       const audio = new Audio(safeUrl);
       audioRef.current = audio;
+      audio.preload = "auto";
 
       audio.onloadedmetadata = () => {
-        setDuration(audio.duration || 240);
+        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+          setDuration(audio.duration);
+        }
       };
 
       audio.ontimeupdate = () => {
